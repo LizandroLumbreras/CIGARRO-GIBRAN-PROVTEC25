@@ -56,7 +56,20 @@
   <div class="info-box" id="infoProducto">
     <p>Esperando código...</p>
   </div>
-
+  <div class="info-box">
+  <h3>Artículos Escaneados</h3>
+  <table id="tablaArticulos" style="width:100%; border-collapse:collapse;">
+    <thead>
+      <tr style="background:#007acc; color:white;">
+        <th>Código</th>
+        <th>Concepto</th>
+        <th>Cantidad</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import {
@@ -185,6 +198,61 @@
         }
       }
     });
+    const tablaBody = document.querySelector("#tablaArticulos tbody");
+const listaProductos = [];
+
+function renderTabla() {
+  tablaBody.innerHTML = "";
+  listaProductos.forEach((item, index) => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${item.codigo}</td>
+      <td>${item.concepto}</td>
+      <td><input type="number" value="${item.cantidad}" min="1" onchange="modificarCantidad(${index}, this.value)" style="width:60px; text-align:center;"></td>
+      <td><button onclick="eliminarArticulo(${index})" style="background:#d9534f; color:white; padding:5px 10px; border:none; border-radius:5px;">Eliminar</button></td>
+    `;
+    tablaBody.appendChild(row);
+  });
+}
+
+window.modificarCantidad = (index, value) => {
+  const cantidad = parseInt(value);
+  if (cantidad > 0) listaProductos[index].cantidad = cantidad;
+};
+
+window.eliminarArticulo = (index) => {
+  if (confirm("¿Eliminar este artículo?")) {
+    listaProductos.splice(index, 1);
+    renderTabla();
+  }
+};
+
+// Modifica el botón registrar para agregar a la lista en lugar de Firebase directamente
+registrarBtn.addEventListener("click", () => {
+  const cantidad = parseInt(cantidadInput.value);
+  if (!productoActual || isNaN(cantidad) || cantidad <= 0) {
+    mostrarAlerta("Debes escanear un código válido y escribir una cantidad.", "error");
+    return;
+  }
+
+  const repetido = listaProductos.find(p => p.codigo === productoActual.codigo);
+  if (repetido) {
+    repetido.cantidad += cantidad;
+  } else {
+    listaProductos.push({
+      codigo: productoActual.codigo,
+      concepto: productoActual.concepto,
+      costo: parseFloat(productoActual.costo),
+      cantidad: cantidad
+    });
+  }
+
+  codigoInput.value = "";
+  cantidadInput.value = "1";
+  infoProducto.innerHTML = "<p>Esperando código...</p>";
+  productoActual = null;
+  renderTabla();
+});
   </script>
 </body>
 </html>
