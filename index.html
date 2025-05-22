@@ -1,48 +1,95 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Menú - Almacén Cigarro 2025</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Entrada - Almacén Cigarro</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Poppins', sans-serif;
       background-color: #f4f4f4;
-      padding: 40px 20px;
+      margin: 0;
+      padding: 20px;
       text-align: center;
     }
-    h1 {
-      color: #333;
-      margin-bottom: 30px;
+
+    .form-container {
+      max-width: 400px;
+      margin: auto;
+      background-color: #fff;
+      padding: 30px 20px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
     }
-    a {
+
+    h2 {
+      margin-bottom: 20px;
+    }
+
+    input, button {
       display: block;
-      margin: 10px auto;
-      padding: 15px 25px;
-      width: 300px;
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    #mensaje {
+      background: #fff;
+      padding: 15px;
+      border-radius: 10px;
+      max-width: 400px;
+      margin: 20px auto 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    /* Tabla integrada debajo del mensaje */
+    .tabla-container {
+      max-width: 800px;
+      margin: 30px auto;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: center;
+    }
+
+    th {
       background-color: #007acc;
       color: white;
-      text-decoration: none;
-      font-size: 18px;
-      border-radius: 8px;
-      transition: background-color 0.3s ease;
     }
-    a:hover {
-      background-color: #005fa3;
+
+    input[type="number"] {
+      width: 60px;
+      text-align: center;
     }
-  </style>
-</head>
-<body>
-  <h1>Almacén Cigarro 2025</h1>
 
-  <a href="Entrada-Almacen-Cigarro-2025-folio.html" target="_blank">
-    Registrar Entrada con Folio
-  </a>
-
-  <a href="entradas-almacen-cigarro.html" target="_blank">
-    Ver Historial de Entradas
-  </a>
-
-</body>
-</html>
+    .delete-btn {
+      background-color: #dc3545;
+      color: white;
+      padding: 5px 10px;
+      border: none;
+      border-radius: 5px;
