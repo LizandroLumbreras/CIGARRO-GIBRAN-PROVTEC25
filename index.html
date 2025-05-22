@@ -1,188 +1,48 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Entrada - Almacén Cigarro</title>
+  <meta charset="UTF-8">
+  <title>Menú - Almacén Cigarro 2025</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
-      font-family: 'Poppins', sans-serif;
+      font-family: Arial, sans-serif;
       background-color: #f4f4f4;
-      margin: 0;
-      padding: 20px;
+      padding: 40px 20px;
       text-align: center;
     }
-
-    .form-container {
-      max-width: 400px;
-      margin: auto;
-      background-color: #fff;
-      padding: 30px 20px;
-      border-radius: 10px;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    h1 {
+      color: #333;
+      margin-bottom: 30px;
     }
-
-    h2 {
-      margin-bottom: 20px;
-    }
-
-    input, button {
+    a {
       display: block;
-      width: 100%;
-      padding: 12px;
-      margin-bottom: 15px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      font-size: 16px;
-    }
-
-    button {
-      background-color: #007bff;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background-color: #0056b3;
-    }
-
-    #mensaje {
-      background: #fff;
-      padding: 15px;
-      border-radius: 10px;
-      max-width: 400px;
-      margin: 20px auto 0;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-
-    /* Tabla fuera del contenedor */
-    .tabla-container {
-      max-width: 800px;
-      margin: 30px auto;
-      background-color: #fff;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    th, td {
-      border: 1px solid #ddd;
-      padding: 10px;
-      text-align: center;
-    }
-
-    th {
+      margin: 10px auto;
+      padding: 15px 25px;
+      width: 300px;
       background-color: #007acc;
       color: white;
+      text-decoration: none;
+      font-size: 18px;
+      border-radius: 8px;
+      transition: background-color 0.3s ease;
     }
-
-    input[type="number"] {
-      width: 60px;
-      text-align: center;
-    }
-
-    .delete-btn {
-      background-color: #dc3545;
-      color: white;
-      padding: 5px 10px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
+    a:hover {
+      background-color: #005fa3;
     }
   </style>
 </head>
 <body>
+  <h1>Almacén Cigarro 2025</h1>
 
-  <div class="form-container">
-    <h2>Entrada - Almacén Cigarro</h2>
-    <a href="entradas-almacen-cigarro.html" target="_blank">
-      <button>Ver historial de entradas</button>
-    </a>
-    <input type="text" id="codigo" placeholder="Escanea o escribe el código...">
-    <input type="number" id="cantidad" value="1">
-    <button onclick="registrarArticulo()">Registrar Entrada</button>
-  </div>
+  <a href="Entrada-Almacen-Cigarro-2025-folio.html" target="_blank">
+    Registrar Entrada con Folio
+  </a>
 
-  <div id="mensaje">Esperando código...</div>
+  <a href="entradas-almacen-cigarro.html" target="_blank">
+    Ver Historial de Entradas
+  </a>
 
-  <div class="tabla-container">
-    <h3>Artículos Escaneados</h3>
-    <table id="tablaArticulos">
-      <thead>
-        <tr>
-          <th>Código</th>
-          <th>Cantidad</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- Filas dinámicas -->
-      </tbody>
-    </table>
-  </div>
-
-  <script>
-    const articulos = [];
-
-    function registrarArticulo() {
-      const codigo = document.getElementById("codigo").value.trim();
-      const cantidad = parseInt(document.getElementById("cantidad").value);
-
-      if (!codigo || isNaN(cantidad) || cantidad <= 0) {
-        alert("Ingrese un código válido y una cantidad mayor a 0.");
-        return;
-      }
-
-      // Verificar si ya existe para sumar
-      const existente = articulos.find(item => item.codigo === codigo);
-      if (existente) {
-        existente.cantidad += cantidad;
-      } else {
-        articulos.push({ codigo, cantidad });
-      }
-
-      document.getElementById("codigo").value = "";
-      document.getElementById("cantidad").value = 1;
-      renderTabla();
-    }
-
-    function renderTabla() {
-      const tbody = document.querySelector("#tablaArticulos tbody");
-      tbody.innerHTML = "";
-
-      articulos.forEach((art, index) => {
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td>${art.codigo}</td>
-          <td><input type="number" value="${art.cantidad}" min="1" onchange="modificarCantidad(${index}, this.value)"></td>
-          <td><button class="delete-btn" onclick="eliminarArticulo(${index})">Eliminar</button></td>
-        `;
-        tbody.appendChild(row);
-      });
-    }
-
-    function modificarCantidad(index, value) {
-      const cantidad = parseInt(value);
-      if (cantidad > 0) {
-        articulos[index].cantidad = cantidad;
-      } else {
-        alert("Cantidad inválida");
-      }
-    }
-
-    function eliminarArticulo(index) {
-      if (confirm("¿Eliminar este artículo?")) {
-        articulos.splice(index, 1);
-        renderTabla();
-      }
-    }
-  </script>
 </body>
 </html>
-
