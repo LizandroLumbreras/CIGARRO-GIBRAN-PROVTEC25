@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -6,43 +5,149 @@
   <title>Menú - Almacén Cigarro 2025</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Poppins', sans-serif;
       background-color: #f4f4f4;
-      padding: 40px 20px;
-      text-align: center;
+      padding: 20px;
     }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background-color: #fff;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+
     h1 {
+      text-align: center;
       color: #333;
       margin-bottom: 30px;
     }
+
     a {
-      display: block;
-      margin: 10px auto;
-      padding: 15px 25px;
-      width: 300px;
+      display: inline-block;
+      margin: 10px;
+      padding: 12px 20px;
       background-color: #007acc;
-      color: white;
+      color: #fff;
       text-decoration: none;
-      font-size: 18px;
+      font-weight: bold;
       border-radius: 8px;
-      transition: background-color 0.3s ease;
+      transition: background 0.3s;
     }
+
     a:hover {
       background-color: #005fa3;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 30px;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #007acc;
+      color: white;
+    }
+
+    input[type="number"] {
+      width: 60px;
+      text-align: center;
+    }
+
+    button {
+      padding: 5px 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .edit-btn {
+      background-color: #f0ad4e;
+      color: white;
+    }
+
+    .delete-btn {
+      background-color: #d9534f;
+      color: white;
     }
   </style>
 </head>
 <body>
-  <h1>Almacén Cigarro 2025</h1>
+  <div class="container">
+    <h1>Almacén Cigarro 2025</h1>
 
-  <a href="Entrada-Almacen-Cigarro-2025-folio.html" target="_blank">
-    Registrar Entrada con Folio
-  </a>
+    <a href="Entrada-Almacen-Cigarro-2025-folio.html" target="_blank">Registrar Entrada con Folio</a>
+    <a href="entradas-almacen-cigarro.html" target="_blank">Ver Historial de Entradas</a>
 
-  <a href="entradas-almacen-cigarro.html" target="_blank">
-    Ver Historial de Entradas
-  </a>
+    <table id="tablaArticulos">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Descripción</th>
+          <th>Cantidad</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Artículos serán añadidos aquí con JS -->
+      </tbody>
+    </table>
+  </div>
 
+  <script>
+    // Ejemplo de artículos escaneados (esto lo puedes sustituir por tu lógica real)
+    let articulos = [
+      { codigo: "123456789", descripcion: "Cigarro Marlboro", cantidad: 10 },
+      { codigo: "987654321", descripcion: "Cigarro Pall Mall", cantidad: 5 }
+    ];
+
+    const tbody = document.querySelector("#tablaArticulos tbody");
+
+    function renderTabla() {
+      tbody.innerHTML = "";
+      articulos.forEach((articulo, index) => {
+        const fila = document.createElement("tr");
+
+        fila.innerHTML = `
+          <td>${articulo.codigo}</td>
+          <td>${articulo.descripcion}</td>
+          <td>
+            <input type="number" value="${articulo.cantidad}" min="1" onchange="actualizarCantidad(${index}, this.value)">
+          </td>
+          <td>
+            <button class="delete-btn" onclick="eliminarArticulo(${index})">Eliminar</button>
+          </td>
+        `;
+
+        tbody.appendChild(fila);
+      });
+    }
+
+    function actualizarCantidad(index, nuevaCantidad) {
+      articulos[index].cantidad = parseInt(nuevaCantidad);
+    }
+
+    function eliminarArticulo(index) {
+      if (confirm("¿Estás seguro de eliminar este artículo?")) {
+        articulos.splice(index, 1);
+        renderTabla();
+      }
+    }
+
+    // Renderiza al cargar
+    renderTabla();
+  </script>
 </body>
 </html>
