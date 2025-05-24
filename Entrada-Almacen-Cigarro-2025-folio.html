@@ -254,21 +254,22 @@ registrarBtn.addEventListener("click", () => {
   productoActual = null;
   renderTabla();
 });
-  // Enfocar el campo de cantidad al cargar la página
+// Al cargar la página, enfocar directamente en el campo de cantidad
 window.addEventListener("load", () => {
   cantidadInput.focus();
 });
 
-// Al presionar Enter en el campo de cantidad, registrar y volver al campo código
+// Al presionar Enter en el campo de cantidad, registrar automáticamente
 cantidadInput.addEventListener("keydown", function(e) {
   if (e.key === "Enter") {
-    e.preventDefault();
-    registrarBtn.click();
+    e.preventDefault(); // Prevenir comportamiento por defecto
+    registrarBtn.click(); // Ejecutar registro
     setTimeout(() => {
-      codigoInput.focus();
+      codigoInput.focus(); // Volver al campo de escaneo
     }, 100);
   }
 });
+
   </script>
 </body>
 </html>
