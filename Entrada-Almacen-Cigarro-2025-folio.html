@@ -256,7 +256,13 @@ registrarBtn.addEventListener("click", () => {
 });
     window.addEventListener("load", () => {
     cantidadInput.focus();
-      });
+      // Al presionar Enter en el campo de cantidad, registrar la entrada automáticamente
+cantidadInput.addEventListener("keydown", function(e) {
+  if (e.key === "Enter") {
+    e.preventDefault(); // Evita que recargue el formulario
+    registrarBtn.click(); // Simula clic en el botón
+  }
+});
   </script>
 </body>
 </html>
