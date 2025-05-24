@@ -261,6 +261,10 @@ cantidadInput.addEventListener("keydown", function(e) {
   if (e.key === "Enter") {
     e.preventDefault(); // Evita que recargue el formulario
     registrarBtn.click(); // Simula clic en el botón
+    // Después de registrar, enfocar el campo de código
+    setTimeout(() => {
+      codigoInput.focus();
+    }, 100); // pequeña pausa para que termine de registrar
   }
 });
   </script>
