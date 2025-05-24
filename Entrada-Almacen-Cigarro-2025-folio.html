@@ -143,12 +143,11 @@
               costo: data["Costo sin Impuesto"] || 0,
             };
             infoProducto.innerHTML = `
+            cantidadInput.focus();
               <p><strong>Concepto:</strong> ${productoActual.concepto}</p>
               <p><strong>Costo sin Impuesto:</strong> ${parseFloat(productoActual.costo).toFixed(2)}</p>
             `;
-            window.addEventListener("load", () => {
-            cantidadInput.focus();
-          });
+            });
         }
       } catch (e) {
         mostrarAlerta("Error al buscar producto: " + e.message, "error");
@@ -255,6 +254,8 @@ registrarBtn.addEventListener("click", () => {
   productoActual = null;
   renderTabla();
 });
+    window.addEventListener("load", () => {
+    cantidadInput.focus();
   </script>
 </body>
 </html>
