@@ -146,6 +146,8 @@
               <p><strong>Concepto:</strong> ${productoActual.concepto}</p>
               <p><strong>Costo sin Impuesto:</strong> ${parseFloat(productoActual.costo).toFixed(2)}</p>
             `;
+            window.addEventListener("load", () => {
+            cantidadInput.focus();
           });
         }
       } catch (e) {
