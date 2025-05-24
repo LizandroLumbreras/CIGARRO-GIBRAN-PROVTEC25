@@ -2,47 +2,198 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Menú - Almacén Cigarro 2025</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Entrada - Almacén Cigarro</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
-      padding: 40px 20px;
-      text-align: center;
+      padding: 20px;
+      background-color: #f8f8f8;
     }
-    h1 {
-      color: #333;
-      margin-bottom: 30px;
-    }
-    a {
+    h2 { text-align: center; }
+    input, button, a {
       display: block;
+      width: 100%;
+      max-width: 480px;
       margin: 10px auto;
-      padding: 15px 25px;
-      width: 300px;
-      background-color: #007acc;
-      color: white;
+      padding: 12px;
+      font-size: 16px;
+      text-align: center;
       text-decoration: none;
-      font-size: 18px;
-      border-radius: 8px;
-      transition: background-color 0.3s ease;
     }
-    a:hover {
-      background-color: #005fa3;
+    .info-box {
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      max-width: 480px;
+      margin: auto;
+    }
+    #alerta {
+      display: none;
+      padding: 10px;
+      margin: 10px auto;
+      max-width: 480px;
+      border-radius: 6px;
+      text-align: center;
     }
   </style>
 </head>
 <body>
-  <h1>Almacén Cigarro 2025</h1>
+  <h2>Entrada - Almacén Cigarro</h2>
+  <div id="alerta"></div>
+  <a href="entradas-almacen-cigarro.html" target="_blank" style="background-color:#339af0; color:white; border-radius:6px; font-weight:bold;">Ver historial de entradas</a>
+  <input type="text" id="codigoInput" placeholder="Escanea o escribe el código...">
+  <input type="number" id="cantidadInput" placeholder="Cantidad" min="1" value="1">
+  <button id="agregarListaBtn" style="background:#6c757d; color:white;">Agregar a lista</button>
+  <div class="info-box" id="infoProducto"><p>Esperando código...</p></div>
+  <div class="info-box">
+    <h3>Artículos Escaneados</h3>
+    <table id="tablaArticulos" style="width:100%; border-collapse:collapse;">
+      <thead>
+        <tr style="background:#007acc; color:white;">
+          <th>Código</th>
+          <th>Concepto</th>
+          <th>Cantidad</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <button id="generarEntradaBtn" style="background-color: #28a745; color: white;">Generar Entrada al Almacén</button>
 
-  <a href="Entrada-Almacen-Cigarro-2025-folio.html" target="_blank">
-    Registrar Entrada con Folio
-  </a>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, query, where, getDocs, addDoc, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-  <a href="entradas-almacen-cigarro.html" target="_blank">
-    Ver Historial de Entradas
-  </a>
+const firebaseConfig = {
+  apiKey: "AIzaSyCK5nb6u2CGRJ8AB1aPlRn54b97bdeAFeM",
+  authDomain: "inventariopv-643f1.firebaseapp.com",
+  projectId: "inventariopv-643f1",
+  storageBucket: "inventariopv-643f1.appspot.com",
+  messagingSenderId: "96242533231",
+  appId: "1:96242533231:web:aae75a18fbaf9840529e9a"
+};
 
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const codigoInput = document.getElementById("codigoInput");
+const cantidadInput = document.getElementById("cantidadInput");
+const agregarListaBtn = document.getElementById("agregarListaBtn");
+const generarEntradaBtn = document.getElementById("generarEntradaBtn");
+const infoProducto = document.getElementById("infoProducto");
+const alerta = document.getElementById("alerta");
+
+function mostrarAlerta(mensaje, tipo = "info") {
+  alerta.textContent = mensaje;
+  alerta.style.display = "block";
+  alerta.style.backgroundColor = tipo === "error" ? "#ffe0e0" : tipo === "success" ? "#e0ffe0" : "#e0e0ff";
+  alerta.style.color = tipo === "error" ? "#b00000" : tipo === "success" ? "#006600" : "#000066";
+  alerta.style.border = tipo === "error" ? "1px solid #b00000" : tipo === "success" ? "1px solid #006600" : "1px solid #000066";
+  setTimeout(() => { alerta.style.display = "none"; }, 5000);
+}
+
+let productoActual = null;
+const listaProductos = [];
+const tablaBody = document.querySelector("#tablaArticulos tbody");
+
+codigoInput.addEventListener("change", async () => {
+  const codigo = codigoInput.value.trim();
+  if (!codigo) return;
+  infoProducto.innerHTML = "<p>Buscando producto...</p>";
+  try {
+    const productosRef = collection(db, "productos");
+    const q = query(productosRef, where("Codigo Barra", "==", codigo));
+    const querySnapshot = await getDocs(q);
+    if (querySnapshot.empty) {
+      productoActual = null;
+      infoProducto.innerHTML = "<p>Producto no encontrado.</p>";
+      mostrarAlerta("Producto no encontrado.", "error");
+    } else {
+      querySnapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        productoActual = { codigo, concepto: data["Concepto"] || "-", costo: data["Costo sin Impuesto"] || 0 };
+        infoProducto.innerHTML = `<p><strong>Concepto:</strong> ${productoActual.concepto}</p><p><strong>Costo sin Impuesto:</strong> ${parseFloat(productoActual.costo).toFixed(2)}</p>`;
+        cantidadInput.focus();
+      });
+    }
+  } catch (e) {
+    mostrarAlerta("Error al buscar producto: " + e.message, "error");
+  }
+});
+
+function renderTabla() {
+  tablaBody.innerHTML = "";
+  listaProductos.forEach((item, index) => {
+    const row = document.createElement("tr");
+    row.innerHTML = `<td>${item.codigo}</td><td>${item.concepto}</td><td><input type="number" value="${item.cantidad}" min="1" onchange="modificarCantidad(${index}, this.value)" style="width:60px; text-align:center;"></td><td><button onclick="eliminarArticulo(${index})" style="background:#d9534f; color:white; padding:5px 10px; border:none; border-radius:5px;">Eliminar</button></td>`;
+    tablaBody.appendChild(row);
+  });
+}
+
+window.modificarCantidad = (index, value) => {
+  const cantidad = parseInt(value);
+  if (cantidad > 0) listaProductos[index].cantidad = cantidad;
+};
+
+window.eliminarArticulo = (index) => {
+  if (confirm("¿Eliminar este artículo?")) {
+    listaProductos.splice(index, 1);
+    renderTabla();
+  }
+};
+
+agregarListaBtn.addEventListener("click", () => {
+  const cantidad = parseInt(cantidadInput.value);
+  if (!productoActual || isNaN(cantidad) || cantidad <= 0) {
+    mostrarAlerta("Debes escanear un código válido y escribir una cantidad.", "error");
+    return;
+  }
+  const repetido = listaProductos.find(p => p.codigo === productoActual.codigo);
+  if (repetido) {
+    repetido.cantidad += cantidad;
+  } else {
+    listaProductos.push({ codigo: productoActual.codigo, concepto: productoActual.concepto, costo: parseFloat(productoActual.costo), cantidad });
+  }
+  renderTabla();
+  codigoInput.value = "";
+  cantidadInput.value = "1";
+  infoProducto.innerHTML = "<p>Esperando código...</p>";
+  productoActual = null;
+  codigoInput.focus();
+});
+
+generarEntradaBtn.addEventListener("click", async () => {
+  if (listaProductos.length === 0) {
+    mostrarAlerta("No hay artículos para registrar en el almacén.", "error");
+    return;
+  }
+  try {
+    const ref = collection(db, "almacenes", "almacen_cigarro", "entradas");
+    const qLast = query(ref, orderBy("folio_num", "desc"), limit(1));
+    const snapshot = await getDocs(qLast);
+    let lastFolioNum = 0;
+    snapshot.forEach(doc => {
+      lastFolioNum = doc.data().folio_num || 0;
+    });
+    const nuevoFolioNum = lastFolioNum + 1;
+    const folioTexto = "AC-" + nuevoFolioNum.toString().padStart(5, "0");
+    const fechaActual = new Date().toISOString();
+    for (const item of listaProductos) {
+      await addDoc(ref, { ...item, fecha: fechaActual, usuario: "admin", folio_num: nuevoFolioNum, folio: folioTexto });
+    }
+    mostrarAlerta("✅ Entrada generada con folio " + folioTexto, "success");
+    listaProductos.length = 0;
+    renderTabla();
+    infoProducto.innerHTML = "<p>Esperando código...</p>";
+    codigoInput.focus();
+  } catch (e) {
+    mostrarAlerta("❌ Error al generar entrada: " + e.message, "error");
+  }
+});
+</script>
 </body>
 </html>
