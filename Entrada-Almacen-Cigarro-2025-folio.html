@@ -136,18 +136,18 @@
           mostrarAlerta("Producto no encontrado.", "error");
         } else {
           querySnapshot.forEach((docSnap) => {
-            const data = docSnap.data();
-            productoActual = {
-              codigo: codigo,
-              concepto: data["Concepto"] || "-",
-              costo: data["Costo sin Impuesto"] || 0,
-            };
-            infoProducto.innerHTML = `
-            cantidadInput.focus();
-              <p><strong>Concepto:</strong> ${productoActual.concepto}</p>
-              <p><strong>Costo sin Impuesto:</strong> ${parseFloat(productoActual.costo).toFixed(2)}</p>
-            `;
-            });
+  const data = docSnap.data();
+  productoActual = {
+    codigo: codigo,
+    concepto: data["Concepto"] || "-",
+    costo: data["Costo sin Impuesto"] || 0,
+  };
+  infoProducto.innerHTML = `
+    <p><strong>Concepto:</strong> ${productoActual.concepto}</p>
+    <p><strong>Costo sin Impuesto:</strong> ${parseFloat(productoActual.costo).toFixed(2)}</p>
+  `;
+  cantidadInput.focus(); // <-- Mueve esta línea aquí correctamente
+});
         }
       } catch (e) {
         mostrarAlerta("Error al buscar producto: " + e.message, "error");
@@ -256,6 +256,7 @@ registrarBtn.addEventListener("click", () => {
 });
     window.addEventListener("load", () => {
     cantidadInput.focus();
+      });
   </script>
 </body>
 </html>
