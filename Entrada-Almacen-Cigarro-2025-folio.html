@@ -1,4 +1,4 @@
-  <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -135,4 +135,187 @@
       });
     }
 
-    window.modif
+    window.modificarCantidad = (index, value) => {
+      const cantidad = parseInt(value);
+      if (cantidad > 0) listaProductos[index].cantidad = cantidad;
+    };
+
+    window.eliminarArticulo = (index) => {
+      if (confirm("¿Eliminar este artículo?")) {
+        listaProductos.splice(index, 1);
+        renderTabla();
+      }
+    };
+
+    codigoInput.addEventListener("change", async () => {
+      const codigo = codigoInput.value.trim();
+      if (!codigo) return;
+
+      infoProducto.innerHTML = "<p>Buscando producto...</p>";
+
+      try {
+        const productosRef = collection(db, "productos");
+        const q = query(productosRef, where("Codigo Barra", "==", codigo));
+        const querySnapshot = await getDocs(q);
+
+        if (querySnapshot.empty) {
+          productoActual = null;
+          infoProducto.innerHTML = "<p>Producto no encontrado.</p>";
+          mostrarAlerta("Producto no encontrado.", "error");
+        } else {
+          querySnapshot.forEach((docSnap) => {
+            const data = docSnap.data();
+            productoActual = {
+              codigo: codigo,
+              concepto: data["Concepto"] || "-",
+              costo: data["Costo sin Impuesto"] || 0,
+            };
+            infoProducto.innerHTML = `
+              <p><strong>Concepto:</strong> ${productoActual.concepto}</p>
+              <p><strong>Costo sin Impuesto:</strong> $${parseFloat(productoActual.costo).toFixed(2)}</p>
+            `;
+            cantidadInput.focus();
+          });
+        }
+      } catch (e) {
+        mostrarAlerta("Error al buscar producto: " + e.message, "error");
+      }
+    });
+
+    agregarBtn.addEventListener("click", () => {
+      const cantidad = parseInt(cantidadInput.value);
+
+      if (!productoActual || isNaN(cantidad) || cantidad <= 0) {
+        mostrarAlerta("Debes escanear un código válido y escribir una cantidad.", "error");
+        return;
+      }
+
+      const repetido = listaProductos.find(p => p.codigo === productoActual.codigo);
+
+      if (repetido) {
+        repetido.cantidad += cantidad;
+      } else {
+        listaProductos.push({
+          codigo: productoActual.codigo,
+          concepto: productoActual.concepto,
+          costo: parseFloat(productoActual.costo),
+          cantidad: cantidad
+        });
+      }
+
+      codigoInput.value = "";
+      cantidadInput.value = "1";
+      infoProducto.innerHTML = "<p>Esperando código...</p>";
+      productoActual = null;
+      renderTabla();
+    });
+
+    registrarBtn.addEventListener("click", async () => {
+      if (listaProductos.length === 0) {
+        mostrarAlerta("No hay productos para registrar.", "error");
+        return;
+      }
+
+      try {
+        const ref = collection(db, "almacenes", "almacen_cigarro", "entradas");
+        const qLast = query(ref, orderBy("folio_num", "desc"), limit(1));
+        const snapshot = await getDocs(qLast);
+        let lastFolioNum = 0;
+        snapshot.forEach(doc => {
+          lastFolioNum = doc.data().folio_num || 0;
+        });
+
+        const nuevoFolioNum = lastFolioNum + 1;
+        const folioTexto = "AC-" + nuevoFolioNum.toString().padStart(5, "0");
+        const fechaActual = new Date().toISOString();
+
+        for (const item of listaProductos) {
+          await addDoc(ref, {
+            codigo: item.codigo,
+            concepto: item.concepto,
+            costo: item.costo,
+            cantidad: item.cantidad,
+            fecha: fechaActual,
+            usuario: "admin",
+            folio_num: nuevoFolioNum,
+            folio: folioTexto
+          });
+        }
+
+        mostrarAlerta("✅ Entrada registrada con folio " + folioTexto, "success");
+
+        const reciboHTML = generarReciboHTML(folioTexto, fechaActual, listaProductos);
+        const printWindow = window.open("", "Recibo", "width=600,height=800");
+        printWindow.document.write(reciboHTML);
+        printWindow.document.close();
+        printWindow.focus();
+        printWindow.print();
+
+        listaProductos.length = 0;
+        renderTabla();
+      } catch (e) {
+        mostrarAlerta("❌ Error al registrar: " + e.message, "error");
+      }
+    });
+
+    function generarReciboHTML(folio, fecha, productos) {
+      let html = `
+        <html>
+        <head>
+          <title>Recibo de Entrada</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 20px; font-size: 14px; }
+            h2 { text-align: center; }
+            table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+            th, td { border: 1px solid #ccc; padding: 6px; text-align: left; }
+            th { background: #007bff; color: white; }
+            .firma { margin-top: 30px; text-align: center; }
+          </style>
+        </head>
+        <body>
+          <h2>La Proveedora - Entrada de Almacén</h2>
+          <p><strong>Folio:</strong> ${folio}</p>
+          <p><strong>Fecha:</strong> ${new Date(fecha).toLocaleString()}</p>
+          <table>
+            <thead>
+              <tr>
+                <th>Código</th>
+                <th>Concepto</th>
+                <th>Cantidad</th>
+                <th>Costo</th>
+              </tr>
+            </thead>
+            <tbody>`;
+      productos.forEach(item => {
+        html += `
+          <tr>
+            <td>${item.codigo}</td>
+            <td>${item.concepto}</td>
+            <td>${item.cantidad}</td>
+            <td>$${item.costo.toFixed(2)}</td>
+          </tr>`;
+      });
+      html += `
+            </tbody>
+          </table>
+          <div class="firma">
+            <p>__________________________________</p>
+            <p>Firma del Responsable</p>
+          </div>
+        </body>
+        </html>
+      `;
+      return html;
+    }
+
+    window.addEventListener("load", () => cantidadInput.focus());
+    cantidadInput.addEventListener("keydown", function(e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        agregarBtn.click();
+        setTimeout(() => { codigoInput.focus(); }, 100);
+      }
+    });
+  </script>
+</body>
+</html>
